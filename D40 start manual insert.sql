@@ -97,7 +97,137 @@ select p.ID,
   from d40_prodotto p
   join d40_tipo_prodotto tp
     on p.tipo_prodotto_id = tp.id;
-    
+
+create or replace view d40_acquisto_vw as
+select a.id acquisto_id,
+       a.data,
+       to_char(a.data,'YYYY')anno,
+       to_char(a.data,'YYYY-MM')annomese,
+       to_char(a.data,'YYYY-Q')annotrimestre,
+       to_char(a.data,'MM')mese,
+       to_char(a.data,'Q')trimestre,
+       p.prodotto,
+       tp.tipo_prodotto,
+       tp.gruppo,
+       f.fornitore,
+       f.zona,
+       a.quantita,
+       a.quantita*p.prezzo_acquisto as importo
+  from d40_acquisto a 
+  join d40_prodotto p on a.prodotto_id = p.id
+  join d40_tipo_prodotto tp on p.tipo_prodotto_id = tp.id
+  join d40_fornitore f on a.fornitore_id = f.id;
+
+
+  create or replace view d40_vendita_vw as
+  select a.id vendita_id,
+       a.data,
+       to_char(a.data,'YYYY')anno,
+       to_char(a.data,'YYYY-MM')annomese,
+       to_char(a.data,'YYYY-Q')annotrimestre,
+       to_char(a.data,'MM')mese,
+       to_char(a.data,'Q')trimestre,
+       p.prodotto,
+       tp.tipo_prodotto,
+       tp.gruppo,
+       c.cliente,
+       c.zona,
+       a.quantita,
+       a.quantita*p.prezzo_vendita as importo
+  from d40_vendita a 
+  join d40_prodotto p on a.prodotto_id = p.id
+  join d40_tipo_prodotto tp on p.tipo_prodotto_id = tp.id
+  join d40_cliente c on a.cliente_id = c.id;
+
+create or replace view d40_acquisto_anno_gruppo_vw as
+select anno,
+       gruppo,
+       sum(quantita) as quantita, 
+       sum(importo) as importo 
+  from d40_acquisto_vw  
+ group by 
+       anno,
+       gruppo 
+ order by 
+       anno, 
+       gruppo;
+
+create or replace view d40_vendita_anno_gruppo_vw as
+select anno,
+       gruppo,
+       sum(quantita) as quantita, 
+       sum(importo) as importo 
+  from d40_vendita_vw  
+ group by 
+       anno,
+       gruppo 
+ order by 
+       anno, 
+       gruppo;
+
+-- create views 1
+create or replace view d40_acquisto_anno_vw as select anno, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by anno order by anno;
+create or replace view d40_acquisto_annomese_vw as select annomese, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by annomese order by annomese;
+create or replace view d40_acquisto_annotrimestre_vw as select annotrimestre, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by annotrimestre order by annotrimestre;
+create or replace view d40_acquisto_data_vw as select data, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by data order by data;
+create or replace view d40_acquisto_fornitore_vw as select fornitore, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by fornitore order by fornitore;
+create or replace view d40_acquisto_gruppo_vw as select gruppo, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by gruppo order by gruppo;
+create or replace view d40_acquisto_prodotto_vw as select prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by prodotto order by prodotto;
+create or replace view d40_acquisto_tipo_prodotto_vw as select tipo_prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by tipo_prodotto order by tipo_prodotto;
+create or replace view d40_acquisto_zona_vw as select zona, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by zona order by zona;
+create or replace view d40_vendita_anno_vw as select anno, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by anno order by anno;
+create or replace view d40_vendita_annomese_vw as select annomese, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by annomese order by annomese;
+create or replace view d40_vendita_annotrimestre_vw as select annotrimestre, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by annotrimestre order by annotrimestre;
+create or replace view d40_vendita_data_vw as select data, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by data order by data;
+create or replace view d40_vendita_fornitore_vw as select fornitore, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by fornitore order by fornitore;
+create or replace view d40_vendita_gruppo_vw as select gruppo, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by gruppo order by gruppo;
+create or replace view d40_vendita_prodotto_vw as select prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by prodotto order by prodotto;
+create or replace view d40_vendita_tipo_prodotto_vw as select tipo_prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by tipo_prodotto order by tipo_prodotto;
+create or replace view d40_vendita_zona_vw as select zona, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by zona order by zona;
+
+-- create views 2
+create or replace view d40_acquisto_anno_fornitore_vw as select anno, fornitore, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by anno, fornitore order by anno, fornitore;
+create or replace view d40_acquisto_anno_gruppo_vw as select anno, gruppo, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by anno, gruppo order by anno, gruppo;
+create or replace view d40_acquisto_anno_prodotto_vw as select anno, prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by anno, prodotto order by anno, prodotto;
+create or replace view d40_acquisto_anno_tipo_prodotto_vw as select anno, tipo_prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by anno, tipo_prodotto order by anno, tipo_prodotto;
+create or replace view d40_acquisto_anno_zona_vw as select anno, zona, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by anno, zona order by anno, zona;
+create or replace view d40_acquisto_annomese_fornitore_vw as select annomese, fornitore, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by annomese, fornitore order by annomese, fornitore;
+create or replace view d40_acquisto_annomese_gruppo_vw as select annomese, gruppo, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by annomese, gruppo order by annomese, gruppo;
+create or replace view d40_acquisto_annomese_prodotto_vw as select annomese, prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by annomese, prodotto order by annomese, prodotto;
+create or replace view d40_acquisto_annomese_tipo_prodotto_vw as select annomese, tipo_prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by annomese, tipo_prodotto order by annomese, tipo_prodotto;
+create or replace view d40_acquisto_annomese_zona_vw as select annomese, zona, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by annomese, zona order by annomese, zona;
+create or replace view d40_acquisto_annotrimestre_fornitore_vw as select annotrimestre, fornitore, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by annotrimestre, fornitore order by annotrimestre, fornitore;
+create or replace view d40_acquisto_annotrimestre_gruppo_vw as select annotrimestre, gruppo, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by annotrimestre, gruppo order by annotrimestre, gruppo;
+create or replace view d40_acquisto_annotrimestre_prodotto_vw as select annotrimestre, prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by annotrimestre, prodotto order by annotrimestre, prodotto;
+create or replace view d40_acquisto_annotrimestre_tipo_prodotto_vw as select annotrimestre, tipo_prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by annotrimestre, tipo_prodotto order by annotrimestre, tipo_prodotto;
+create or replace view d40_acquisto_annotrimestre_zona_vw as select annotrimestre, zona, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by annotrimestre, zona order by annotrimestre, zona;
+create or replace view d40_acquisto_data_fornitore_vw as select data, fornitore, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by data, fornitore order by data, fornitore;
+create or replace view d40_acquisto_data_gruppo_vw as select data, gruppo, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by data, gruppo order by data, gruppo;
+create or replace view d40_acquisto_data_prodotto_vw as select data, prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by data, prodotto order by data, prodotto;
+create or replace view d40_acquisto_data_tipo_prodotto_vw as select data, tipo_prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by data, tipo_prodotto order by data, tipo_prodotto;
+create or replace view d40_acquisto_data_zona_vw as select data, zona, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by data, zona order by data, zona;
+create or replace view d40_vendita_anno_fornitore_vw as select anno, fornitore, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by anno, fornitore order by anno, fornitore;
+create or replace view d40_vendita_anno_gruppo_vw as select anno, gruppo, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by anno, gruppo order by anno, gruppo;
+create or replace view d40_vendita_anno_prodotto_vw as select anno, prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by anno, prodotto order by anno, prodotto;
+create or replace view d40_vendita_anno_tipo_prodotto_vw as select anno, tipo_prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by anno, tipo_prodotto order by anno, tipo_prodotto;
+create or replace view d40_vendita_anno_zona_vw as select anno, zona, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by anno, zona order by anno, zona;
+create or replace view d40_vendita_annomese_fornitore_vw as select annomese, fornitore, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by annomese, fornitore order by annomese, fornitore;
+create or replace view d40_vendita_annomese_gruppo_vw as select annomese, gruppo, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by annomese, gruppo order by annomese, gruppo;
+create or replace view d40_vendita_annomese_prodotto_vw as select annomese, prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by annomese, prodotto order by annomese, prodotto;
+create or replace view d40_vendita_annomese_tipo_prodotto_vw as select annomese, tipo_prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by annomese, tipo_prodotto order by annomese, tipo_prodotto;
+create or replace view d40_vendita_annomese_zona_vw as select annomese, zona, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by annomese, zona order by annomese, zona;
+create or replace view d40_vendita_annotrimestre_fornitore_vw as select annotrimestre, fornitore, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by annotrimestre, fornitore order by annotrimestre, fornitore;
+create or replace view d40_vendita_annotrimestre_gruppo_vw as select annotrimestre, gruppo, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by annotrimestre, gruppo order by annotrimestre, gruppo;
+create or replace view d40_vendita_annotrimestre_prodotto_vw as select annotrimestre, prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by annotrimestre, prodotto order by annotrimestre, prodotto;
+create or replace view d40_vendita_annotrimestre_tipo_prodotto_vw as select annotrimestre, tipo_prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by annotrimestre, tipo_prodotto order by annotrimestre, tipo_prodotto;
+create or replace view d40_vendita_annotrimestre_zona_vw as select annotrimestre, zona, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by annotrimestre, zona order by annotrimestre, zona;
+create or replace view d40_vendita_data_fornitore_vw as select data, fornitore, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by data, fornitore order by data, fornitore;
+create or replace view d40_vendita_data_gruppo_vw as select data, gruppo, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by data, gruppo order by data, gruppo;
+create or replace view d40_vendita_data_prodotto_vw as select data, prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by data, prodotto order by data, prodotto;
+create or replace view d40_vendita_data_tipo_prodotto_vw as select data, tipo_prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by data, tipo_prodotto order by data, tipo_prodotto;
+create or replace view d40_vendita_data_zona_vw as select data, zona, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by data, zona order by data, zona;
+
+
 -- load data
 -- INSERTING into D40_TIPO_PRODOTTO
 --SET DEFINE OFF;
