@@ -244,7 +244,10 @@ create or replace view d40_vendita_prodotto_cliente_vw as select prodotto, clien
 create or replace view d40_vendita_prodotto_zona_vw as select prodotto, zona, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by prodotto, zona order by prodotto, zona;
 create or replace view d40_vendita_tipo_cliente_vw as select tipo, cliente, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by tipo, cliente order by tipo, cliente;
 create or replace view d40_vendita_tipo_zona_vw as select tipo, zona, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by tipo, zona order by tipo, zona;
-
+create or replace view d40_acquisto_gruppo_prodotto_vw as select gruppo, prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by gruppo, prodotto order by gruppo, prodotto;
+create or replace view d40_acquisto_tipo_prodotto_vw as select tipo, prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_acquisto_vw group by tipo, prodotto order by tipo, prodotto;
+create or replace view d40_vendita_gruppo_prodotto_vw as select gruppo, prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by gruppo, prodotto order by gruppo, prodotto;
+create or replace view d40_vendita_tipo_prodotto_vw as select tipo, prodotto, sum(quantita) as quantita, sum(importo) as importo, case when sum(quantita)<>0 then round(sum(importo)/sum(quantita),2) else 0 end as importo_medio, count(*) as numero from d40_vendita_vw group by tipo, prodotto order by tipo, prodotto;
 
 -- load data
 -- INSERTING into D40_tipo
