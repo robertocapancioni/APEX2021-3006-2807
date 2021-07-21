@@ -1,4 +1,4 @@
-create or replace view eu20_data_vw as
+create or replace view eu20_teams_vw as
 select
 TEAMCODE	,
 BIGLOGOURL	,
@@ -24,7 +24,7 @@ VALUE16	Gol_subiti,
 VALUE17	Autogol,
 VALUE18	Rigori_parati,
 VALUE19	Gol_Fatti
-from eu20_data;
+from eu20_teams;
 
 create or replace view eu20_players_vw as
 select 
